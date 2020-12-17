@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Employees
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <h1 class="text-light my-3">Employees</h1>
+    <h2>
+        <form method="get">
+            {{ filter.form.as_p }}
+            <input type="submit" />
+        </form>
+        {% for obj in filter.qs %}
+            {{obj}} <br />
+        {% endfor %}
+    </h2>
+    <div class="row">
+        {% for employee in employees.all %}
+            <div class="col-md-6 col-lg-6">
+                <div class="border p-5 my-2 opacity-bg">
+                    <h3>
+                        {{ employee.first_name }}<br>
+                        {{ employee.middle_name }}<br>
+                        {{ employee.last_name }}<br>
+                        {{ employee.position }}<br>
+                        {{ employee.salary }}<br>
+                        <a href="#">
+                            {{ employee.boss_id }}
+                        </a>
+
+
+                    </h3>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
