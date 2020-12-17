@@ -6,3 +6,4 @@ admin.site.register(Employee)
 admin.site.register(Boss)
 admin.site.register(EmployeeSalary)
 admin.site.register(Position)
+

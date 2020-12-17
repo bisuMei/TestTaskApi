@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.conf import settings
 
 # Create your models here.
 
@@ -12,6 +13,9 @@ class Boss(models.Model):
     def __str__(self):
         return self.surname
 
+    def get_absolute_url(self):
+        return reverse('firm_api:details')
+
 
 class Position(models.Model):
     position = models.CharField(max_length=50)
@@ -21,6 +25,8 @@ class Position(models.Model):
 
 
 class Employee(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=15)
     middle_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=15)
@@ -31,9 +37,6 @@ class Employee(models.Model):
 
     def __str__(self):
         return self.last_name
-
-    def get_absolute_url(self):
-        return reverse('firm_api:details')
 
 
 class EmployeeSalary(models.Model):

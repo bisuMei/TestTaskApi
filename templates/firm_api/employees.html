@@ -1,41 +1,61 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Employees
-{% endblock %}
-
+{% load widget_tweaks %}
 
 {% block content %}
-<div class="container">
-    <h1 class="text-light my-3">Employees</h1>
-    <h2>
-        <form method="get">
-            {{ filter.form.as_p }}
-            <input type="submit" />
-        </form>
-        {% for obj in filter.qs %}
-            {{obj}} <br />
-        {% endfor %}
-    </h2>
-    <div class="row">
-        {% for employee in employees.all %}
-            <div class="col-md-6 col-lg-6">
-                <div class="border p-5 my-2 opacity-bg">
-                    <h3>
-                        {{ employee.first_name }}<br>
-                        {{ employee.middle_name }}<br>
-                        {{ employee.last_name }}<br>
-                        {{ employee.position }}<br>
-                        {{ employee.salary }}<br>
-                        <a href="#">
-                            {{ employee.boss_id }}
-                        </a>
-
-
-                    </h3>
-                </div>
-            </div>
-        {% endfor %}
+  <form method="get">
+    <div class="well">
+      <h4 style="margin-top: 0">Filter</h4>
+      <div class="row">
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.position.label_tag }}
+          {% render_field filter.form.position class="form-control" %}
+        </div>
+        <div class="form-group col-sm-8 col-md-6">
+          {{ filter.form.groups.label_tag }}
+          <div>
+            {% for choice in filter.form.groups %}
+              <label class="checkbox-inline">
+                {{ choice.tag }} {{ choice.choice_label }}
+              </label>
+            {% empty %}
+              <em class="text-muted">No group</em>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-search"></span> Search
+      </button>
     </div>
-</div>
+  </form>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Middle Name</th>
+        <th>Last Name</th>
+        <th>Position</th>
+        <th>Boss ID</th>
+        <th>Salary</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in filter.qs %}
+        <tr>
+          <td>{{ user.first_name }}</td>
+          <td>{{ user.middle_name }}</td>
+          <td>{{ user.last_name }}</td>
+          <td>{{ user.position }}</td>
+          <td>{{ user.boss_id }}</td>
+          <td>{{ user.salary }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5">No data</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}
