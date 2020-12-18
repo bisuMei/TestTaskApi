@@ -15,6 +15,10 @@ from django.utils.safestring import mark_safe
 from . import forms
 from . import models
 
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .serializes import EmployeeSerializer
+from django_filters.rest_framework import DjangoFilterBackend
 # Create your views here.
 
 
@@ -69,3 +73,18 @@ def search(request):
     user_list = models.Employee.objects.all()
     user_filter = EmployeeFilter(request.GET, queryset=user_list)
     return render(request, 'firm_api/employees.html', {'filter': user_filter})
+
+
+class EmployeeView(APIView):
+
+    def get(self, request):
+        employees = models.Employee.objects.all()
+        serializer = EmployeeSerializer(employees, many=True)
+        return Response({"employees": serializer.data})
+
+
+class EmployeeList(APIView):
+    queryset = models.Employee.objects.all()
+    serializer_class = EmployeeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['hierarchy_level']

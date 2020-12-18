@@ -1,22 +1,28 @@
-import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.views import APIView
+from rest_framework import generics
+
 from .models import Employee
 from django import forms
 from django.contrib.auth.models import Group
+from django_filters import rest_framework as filters
+
+from .serializes import EmployeeSerializer
 
 
-class EmployeeFilter(django_filters.FilterSet):
-    total_salary_paid = django_filters.ModelMultipleChoiceFilter(queryset=Employee.objects.all(),
-                                                                 widget=forms.CheckboxSelectMultiple)
+class EmployeeFilter(filters.FilterSet):
+    level = filters.NumberFilter(field_name="level")
 
-    class Meta:
-        model = Employee
-        fields = ['first_name', 'middle_name', 'last_name',
-                  'position', 'employment_date', 'salary',
-                  'boss_id', 'hierarchy_level', 'total_salary_paid']
+    fields = ['first_name', 'middle_name', 'last_name',
+              'position', 'employment_date', 'salary',
+              'boss_id', 'hierarchy_level', 'total_salary_paid']
 
 
-
-
+class EmployeeList(generics.ListAPIView):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['hierarchy_level']
 
 
 
