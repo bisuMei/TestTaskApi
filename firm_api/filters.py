@@ -5,14 +5,14 @@ from django.contrib.auth.models import Group
 
 
 class EmployeeFilter(django_filters.FilterSet):
-    group = django_filters.ModelMultipleChoiceFilter(queryset=Group.objects.all(),
-                                                      widget=forms.CheckboxSelectMultiple)
+    total_salary_paid = django_filters.ModelMultipleChoiceFilter(queryset=Employee.objects.all(),
+                                                                 widget=forms.CheckboxSelectMultiple)
 
     class Meta:
         model = Employee
         fields = ['first_name', 'middle_name', 'last_name',
                   'position', 'employment_date', 'salary',
-                  'boss_id', 'group']
+                  'boss_id', 'hierarchy_level', 'total_salary_paid']
 
 
 

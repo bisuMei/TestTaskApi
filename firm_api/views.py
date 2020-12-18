@@ -41,7 +41,7 @@ def user_login(request):
                 return HttpResponse('Wrong credentials')
     else:
         form = forms.LoginForm()
-        return render(request, 'training/login.html', {'form': form})
+        return render(request, 'registration/login.html', {'form': form})
 
 
 def register(request):

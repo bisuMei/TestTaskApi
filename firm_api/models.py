@@ -24,6 +24,10 @@ class Position(models.Model):
         return self.position
 
 
+class HierarchyLevels(models.Model):
+    level = models.IntegerField(unique=True)
+
+
 class Employee(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE, null=True)
@@ -33,15 +37,16 @@ class Employee(models.Model):
     position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name="emp_position")
     employment_date = models.DateField()
     salary = models.IntegerField(blank=True)
-    boss_id = models.ForeignKey(Boss, on_delete=models.CASCADE)
+    total_salary_paid = models.IntegerField(null=True)
+    boss_id = models.ForeignKey(Boss, on_delete=models.CASCADE, related_name='emp_boss_id')
+    hierarchy_level = models.ForeignKey(HierarchyLevels, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.last_name
 
 
-class EmployeeSalary(models.Model):
-    total_salary = models.IntegerField(blank=True)
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='emp_salary')
+
+
 
 
 
