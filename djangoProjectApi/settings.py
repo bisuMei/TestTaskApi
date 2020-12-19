@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'django_filters',
     'widget_tweaks',
     'crispy_forms',
-    'django_admin_relation_links'
+    'django_admin_relation_links',
+    'django_seed',
+
 ]
 
 MIDDLEWARE = [

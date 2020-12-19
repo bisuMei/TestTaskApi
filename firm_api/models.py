@@ -25,12 +25,20 @@ class Position(models.Model):
 
 
 class HierarchyLevels(models.Model):
-    level = models.IntegerField(unique=True)
+    level = models.PositiveIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        if self.level > 5:
+            return "Maximum 5 levels"
+        else:
+            super().save(*args, **kwargs)
+
+    def __str__(self):
+        lev = str(self.level)
+        return lev
 
 
 class Employee(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL,
-                                on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=15)
     middle_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=15)
