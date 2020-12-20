@@ -1,81 +1,78 @@
-from django.shortcuts import render, get_object_or_404
-from . import models
-from .filters import EmployeeFilter
-from django.shortcuts import render, redirect, get_object_or_404
+from knox.models import AuthToken
+from rest_framework import generics, viewsets, permissions
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from knox.views import LoginView as KnoxLoginView
+from django.contrib.auth.models import User
+from rest_framework.generics import ListCreateAPIView
 
-from django.contrib.auth import authenticate
-from django.contrib.auth import login
-from django.http import HttpResponse
+from .decorators import define_usage
 
-from django.contrib.auth.models import User, Group
-from django.contrib.auth.decorators import login_required, permission_required
-from django.urls import reverse_lazy
-from django.utils.safestring import mark_safe
-
-from . import forms
 from . import models
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializes import EmployeeSerializer
+
+from .models import Employee
+from .serializes import EmployeeSerializer, RegisterSerializer, UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-# Create your views here.
+
+from rest_framework.reverse import reverse
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.permissions import AllowAny
+
+# More rest imports as needed
+from django.contrib.auth import authenticate, login
 
 
-def index(request):
-    return render(request, 'firm_api/index.html', {'title': 'Main page'})
+from rest_framework.permissions import IsAdminUser
 
 
-def user_login(request):
-    if request.method == 'POST':
-        form = forms.LoginForm(request.POST)
-        if form.is_valid():
-            cd = form.cleaned_data
-            user = authenticate(
-                username=cd['username'],
-                password=cd['password'],
-            )
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return HttpResponse('Logged In')
-                else:
-                    return HttpResponse('Not active')
-            else:
-                return HttpResponse('Wrong credentials')
-    else:
-        form = forms.LoginForm()
-        return render(request, 'registration/login.html', {'form': form})
+# Create your views here
+@api_view(['GET'])
+def api_root(request, format=None):
+    """
+    The entry endpoint of our API.
+    """
+    return Response({
+        'employees': reverse('employees', request=request),
+        'register': reverse('register', request=request),
+        'login': reverse('login', request=request),
+        'logout': reverse('logout', request=request),
+    })
 
 
-def register(request):
-    if request.method == 'POST':
-        form = forms.RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            group = form.cleaned_data['group']
-            group.user_set.add(user)
-            models.Employee.objects.create(user=user)
-            return redirect('/')
-    else:
-        form = forms.RegisterForm()
-    return render(request, "registration/register.html", {'form': form})
+class EmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all().order_by('first_name')
+    serializer_class = EmployeeSerializer
 
 
-def employee_details(request):
-    employee = get_object_or_404(models.Employee, pk=id)
-    return render(request,
-                  'firm_api/details.html',
-                  {'employee': employee})
+# Register API
+class RegisterAPI(generics.GenericAPIView):
+    serializer_class = RegisterSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response({
+        "user": UserSerializer(user, context=self.get_serializer_context()).data,
+        "token": AuthToken.objects.create(user)[1]
+        })
 
 
-def search(request):
-    user_list = models.Employee.objects.all()
-    user_filter = EmployeeFilter(request.GET, queryset=user_list)
-    return render(request, 'firm_api/employees.html', {'filter': user_filter})
+class LoginAPI(KnoxLoginView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request, format=None):
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        login(request, user)
+        return super(LoginAPI, self).post(request, format=None)
 
 
-class EmployeeView(APIView):
+class EmployeeView(generics.ListCreateAPIView):
 
     def get(self, request):
         employees = models.Employee.objects.all()
@@ -83,8 +80,13 @@ class EmployeeView(APIView):
         return Response({"employees": serializer.data})
 
 
-class EmployeeList(APIView):
-    queryset = models.Employee.objects.all()
+@authentication_classes((SessionAuthentication, BasicAuthentication, TokenAuthentication))
+@permission_classes((IsAdminUser,))
+class EmployeeList(generics.ListAPIView):
+    queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['hierarchy_level']
+
+
+

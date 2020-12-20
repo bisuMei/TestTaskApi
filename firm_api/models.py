@@ -1,31 +1,29 @@
 from django.db import models
 from django.urls import reverse
 from django.conf import settings
+from django.contrib.auth.models import User
 
 # Create your models here.
 
 
 class Boss(models.Model):
-    boss_id = models.IntegerField(unique=True)
+    boss_id = models.PositiveIntegerField(unique=True)
     name = models.CharField(max_length=50)
     surname = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.surname
-
-    def get_absolute_url(self):
-        return reverse('firm_api:details')
+        return str(self.boss_id)
 
 
 class Position(models.Model):
-    position = models.CharField(max_length=50)
+    position = models.CharField(max_length=20)
 
     def __str__(self):
         return self.position
 
 
 class HierarchyLevels(models.Model):
-    level = models.PositiveIntegerField(default=1)
+    level = models.PositiveIntegerField(unique=True)
 
     def save(self, *args, **kwargs):
         if self.level > 5:
@@ -39,6 +37,7 @@ class HierarchyLevels(models.Model):
 
 
 class Employee(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=15)
     middle_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=15)
