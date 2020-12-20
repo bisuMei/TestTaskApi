@@ -11,8 +11,6 @@ def delete_total_paid(modeladmin, request, queryset):
         employee.save()
 
 
-
-
 delete_total_paid.short_description = "Delete chosen salaries"
 
 
@@ -32,10 +30,6 @@ class EmployeeAdmin(AdminChangeLinksMixin, admin.ModelAdmin):
     list_filter = ('position', 'hierarchy_level')
     change_links = ['boss_id']
     actions = [delete_total_paid]
-
-
-
-
 
 
 admin.site.register(Position)

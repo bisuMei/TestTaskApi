@@ -1,7 +1,6 @@
 from django.urls import path, include
 from firm_api import views, filters
 from knox import views as knox_views
-from rest_framework import routers
 
 
 urlpatterns = [

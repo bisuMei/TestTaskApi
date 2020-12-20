@@ -1,16 +1,11 @@
 from knox.models import AuthToken
-from rest_framework import generics, viewsets, permissions
+from rest_framework import generics, viewsets
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.views import LoginView as KnoxLoginView
-from django.contrib.auth.models import User
-from rest_framework.generics import ListCreateAPIView
-
-from .decorators import define_usage
 
 from . import models
 
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Employee
 from .serializes import EmployeeSerializer, RegisterSerializer, UserSerializer
@@ -22,7 +17,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import AllowAny
 
 # More rest imports as needed
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 
 
 from rest_framework.permissions import IsAdminUser
@@ -31,14 +26,11 @@ from rest_framework.permissions import IsAdminUser
 # Create your views here
 @api_view(['GET'])
 def api_root(request, format=None):
-    """
-    The entry endpoint of our API.
-    """
+
     return Response({
         'employees': reverse('employees', request=request),
         'register': reverse('register', request=request),
         'login': reverse('login', request=request),
-        'logout': reverse('logout', request=request),
     })
 
 
